@@ -1,0 +1,63 @@
+{% extends "blog/base.html" %}
+{% block content %}
+    <article class="media content-section">
+        <img class="rounded-circle article-img" src="{{ object.author.profile.image.url }}" alt="">
+        <div class="media-body">
+            <div class="article-metadata">
+                <a class="mr-2" href="#">{{ object.author }}</a>
+                <small class="text-muted">{{ object.date_posted|date:"d m Y" }}</small>
+                {% if object.author == user %}
+                    <div>
+                        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' object.id %}">Edit post</a>
+                        <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' object.id %}">Delete post</a>
+                    </div>
+                {% endif %}
+            </div>
+            <h2 class="article-title">{{ object.title }}</h2>
+            <hr>
+            <div>
+                <p class="article-content">{{ object.content }}</p>
+                {% if post.image %}
+                    <img src="{{post.image.url}}" class="img-fluid" alt="Responsive image" >
+                {% endif %}
+            </div>
+            {% if user.is_authenticated %}
+                <hr>
+                <div>
+                    <form action="{% url 'like-post' post.pk %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="post_id" value="{{ post.id }}" class="btn btn-primary btn-sm">Like</button> - {{ total_likes }} likes
+                    </form>
+                </div>
+            {% endif %}
+            <hr>
+            <div>
+                <h3>Comments</h3>
+                {% if not post.comments.all %}
+                    No comments to show :( <a href="{% url 'post-comment' post.pk %}">Comment!</a>
+                {% else %}
+                    {% for comment in post.comments.all %}
+                        <article class="media content-section">
+                            <img class="rounded-circle article-img" src="{{ comment.c_author.profile.image.url }}" alt="">
+
+                            <div class="media-body">
+                                <div class="article-metadata">
+                                    {% if comment.c_author == user %}
+                                        <div>
+                                            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'comment-update' object.id %}">Edit comment</a>
+                                            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'comment-delete' object.id %}">Delete comment</a>
+                                        </div>
+                                    {% endif %}
+                                    <a class="mr-2" href="#">{{ comment.c_author }}</a>
+                                    <small class="text-muted">{{ comment.timestamp|date:"d m Y" }}</small>
+                                </div>
+                                <p class="article-content">{{ comment.comment }}</p>
+                            </div>
+                        </article>
+                    {% endfor %}
+                    <a href="{% url 'post-comment' post.pk %}">Comment!</a>
+                {% endif %}
+            </div>
+        </div>
+    </article>
+{% endblock content %}
